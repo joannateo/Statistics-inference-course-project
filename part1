@@ -1,0 +1,113 @@
+---
+title: "Coursera Statistical Inference - Simulation"
+author: "Joanna Teo"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+   : united
+    toc: yes highlight: pygments
+    keep_md: yes
+    theme
+
+```{r required.packages, echo=FALSE}
+require('knitr', quietly=TRUE)
+```
+
+## Overview
+We will perform an exponential distribution simulation and 
+compare it to the CLT(Centeral Limit Theorem). The excercise we are 
+undertaking is already restricted to specific values that we are 
+documented in the code itself.
+
+## Simulations
+As instructed we are going to perform 1000 simulations of 40 samples each, where `lambda = 0.2`
+
+```{r simulations}
+set.seed(1234)      # Just a seed 
+lambda <- 0.2       # Given by the exercise
+sample.size <- 40   # Given by the exercise
+sims <- 1000        # Suggested by the exercise
+d.mean <- 1/lambda  # Distribution mean. Inherent property
+d.sd   <- 1/lambda  # Disribution standard deviation. Inheret property
+
+exp.sim <- matrix(rexp(sims*sample.size, rate=lambda), sims, sample.size)
+means <- rowMeans(exp.sim)
+```  
+  
+## Analysis
+```{r diagram.function, echo=FALSE}
+plot.hist.scale <- function(subject, ms, ss) {
+  hist(ms, breaks=25, probability=TRUE, main=subject, xlab="", col="darkgreen")
+  lines(density(ms), col="red", lwd=3) 
+  curve(dnorm(x, d.mean, d.sd/sqrt(ss)), min(ms), max(ms), col="purple", add=T, lty=2, lwd=3)
+
+  # add legend
+  legend('topright', c("simulation", "theoretical"), lty=c(1,2), col=c("red", "purple"))
+}  
+  
+plot.hist <- function(subject, ms, ss) {
+  hist(ms, breaks=25, prob=TRUE,
+       main=subject, xlab="", col="darkgreen")
+  lines(density(ms), col="red", lwd=3) # density of the averages of samples
+
+  abline(v=d.mean, col="darkblue", lwd=3) # Theoretical distribution center
+
+  # theoretical density of the averages of samples
+  curve(dnorm(x, d.mean, d.sd/sqrt(ss)), min(ms), max(ms), col="purple", add=T, lty=2, lwd=3)
+  # add legend
+  legend('topright', c("simulation", "theoretical"), lty=c(1,2), col=c("red", "purple"))
+}
+```
+
+```{r diagram, echo=FALSE}
+plot.hist("Sample averages' of Exp. distribution. with rate = 0.2", means, sample.size)
+``` 
+
+### Sample mean vs. theoretical mean
+```{r mean, echo=TRUE}
+sample.mean <- mean(means)
+theoretical.mean <- 1/lambda
+```  
+The deviation of the sample mean ```r sample.mean``` from the theoretical
+mean ```r theoretical.mean``` is approximately 
+```r round(abs(sample.mean - theoretical.mean)/theoretical.mean, 3) * 100```% 
+      
+### 2. Sample variance vs. Theoretical variance  
+  
+```{r variance, echo=TRUE}
+sample.sd <- sd(means)
+theoretical.sd <- (d.sd)/sqrt(sample.size)
+
+sample.var <- var(means)
+theoretical.var <- 1 / (lambda ** 2 * 40)
+```  
+The sample variance ```r sample.var``` is different from the theoretical variance ```r theoretical.var``` by 
+```r round(abs(sample.var - theoretical.var)/ theoretical.var, 3)*100```%
+
+and the sample standard deviation ```r sample.sd``` diffrantiates from the 
+theoretical standard deviation ```r theoretical.sd``` by 
+```r round(abs(sample.sd - theoretical.sd)/ theoretical.sd, 3)*100```%
+  
+### 3. Is the distribution normal?  
+
+```{r samples, echo=FALSE, fig.width=12, fig.height=8}
+mult = 20
+par(mfrow=c(1,2))
+means2 <- rowMeans(matrix(rexp(sims*sample.size*mult, rate=lambda), 
+                 sims, sample.size * mult))
+plot.hist("Sample averages' (40 samples)", means, sample.size)
+plot.hist("Sample averages (800 samples)", means2, sample.size * mult)
+```
+**Notice** how the the averages of 800 samples from the exponential distrbution converges to the mean vis-a-vis the the averages of 40 samples, it is also visibly
+closer to the normal distribution. 
+
+#### Q-Q Plot 
+
+```{r normal, echo=FALSE, fig.height=3, fig.width=4}    
+qqnorm(means, col="darkgreen")
+qqline(means, col="purple")
+```  
+
+A Q-Q plot indicates as well that the 40 exponentials are quite close to the normal distribution.
