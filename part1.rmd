@@ -1,15 +1,7 @@
----
-title: "Coursera Statistical Inference - Simulation-Part 1"
-author: "Joanna Teo"
-output:
-  pdf_document:
-    toc: yes
-  html_document:
-   : united
-    toc: yes highlight: pygments
-    keep_md: yes
-    theme
----
+
+##Coursera Statistical Inference - Simulation-Part 1
+##Author: "Joanna Teo"
+
 ```{r required.packages, echo=FALSE}
 require('knitr', quietly=TRUE)
 ```
