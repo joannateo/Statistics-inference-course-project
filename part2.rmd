@@ -1,0 +1,108 @@
+## Overview
+Report analyses the ToothGrowth data as per the instructions provided 
+In Coursera Statistical Inference, Basic inferential data analysis.
+
+```{r load.other, echo=FALSE}
+library(ggplot2)
+library(plyr)
+```
+
+## Load the data
+```{r load, echo=TRUE}
+library(datasets)
+data(ToothGrowth)
+```
+## Analysis
+### 1. Basic exploratory data analysis
+Have a quick glance what this data is like
+```{r str, echo=TRUE}
+str(ToothGrowth)
+```
+It's not immediately self explanatory, reading the help using `help(ToothGrowth)` we gather the following information
+
+We have 3 columns in `ToothGrowth dataset` 
+
+|   Name   |   Type    |    Values           | 
+|----------|-----------|---------------------|
+|   `len`  |   numeric |  Tooth length       |
+|   `supp` |   factor  |  **VC** or **OJ**   |
+|   `dose` |   numeric | Dose in milligrams |
+
+And it tracks the response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid, OJ or VC respectively).
+```  
+  
+### 2. Basic summary 
+  
+Observe R summary result
+```{r summary, echo=TRUE}  
+summary(ToothGrowth)
+````
+
+Inspect the tests distribution by supplement and dose
+```{r test.distribution, echo=TRUE}
+table(ToothGrowth$dose, ToothGrowth$supp)
+```
+10 tests for each pair.
+
+```{r plot, echo=TRUE}
+agg <- aggregate(len ~ dose + supp, ToothGrowth, mean)
+ggplot(agg, aes(x=dose, y=len, colour = supp)) +
+    geom_line(size=2, alpha=.5) + geom_point(size=5, alpha=.3) +
+    xlab("Dose(miligrams)") + ylab("Avg. Tooth length") +
+    guides(colour=guide_legend(title="Supplement type")) +
+    scale_color_manual(values = c("darkblue", "#E69F00"))
+```  
+  
+There seems to be a correlation between the dose and tooth growth, where 
+Orange Juice is more effective for lower doses, where the 2 milligram 
+seems to be the maximum effect point.
+
+### 3. Comparisom of tooth growth by supp and dose  
+To verify that that our conclusions based on the sample diagram, we need 
+identify the confidence interval for each of the supplement/dose.
+```{r by.dose, echo=TRUE}
+ddply(ToothGrowth, dose ~ supp,function(x) 
+      c(mean=mean(x$len), sd=sd(x$len),
+        conf.int=t.test(x$len)$conf.int))
+```  
+We observe that in 95% confidence interval the `Ascorbic Acid(VC)` intervals are pairwise disjoint so we can claim with high level of confidence that the length means are distinct, moreover there is a clear growth correlation between dose & length means.
+
+By now we can also immediately identify with high level of confidence 
+that For 0.5 and 1 milligrams Orange Juice have has greater impact on 
+tooth growth (On the merit that for those 2 doses there confidence
+interval are pairwise disjoint).
+
+For Orange Juice(OJ) supplement type, however, there is an overlap for dose 1 and 2 milligrams, 
+and we are forced to look deeper.
+```{r by.dose.hypothesis.test, echo=TRUE}
+t.test(len ~ dose, paired=FALSE, var.equal=TRUE,
+       data=subset(ToothGrowth, dose %in% c(1.0,2.0) & supp == 'OJ'))
+```
+
+```{r by.dose.hypotheis.test.hidden, echo=FALSE}
+hp <- t.test(len ~ dose, paired=FALSE, var.equal=TRUE,
+       data=subset(ToothGrowth, dose %in% c(1.0,2.0) & supp == 'OJ'))
+t <- hp$statistic
+p <- hp$parameter
+q <- qt(.025, p)
+```
+The t value ```r t``` being less than **qt(.025, ```r p```)** == ```r q```
+allows us to assert that the mean length for 2 milligrams as greater than the for the 1 milligram dose.
+
+In the 2.0 milligram dose there is an overlap between `Orange Juice (OJ)` and `Ascorbic Acid (VC)` let's dig deeper 
+```{r by.supp, echo=TRUE}
+t.test(len ~ supp, paired=FALSE, var.equal=FALSE,
+       data=subset(ToothGrowth, dose == 2.0))
+```
+The confidence Interval includes 0 and hence difference between the supplements types vis-a-vis mean lengths is insignificant.
+
+## Conclusion
+We have conducted an analysis of the ToothGrowth data based on the 
+assumptions that guinea pigs were randomly chosen and hence the 
+population variance the same. We are also assuming that the samples
+are independent so the unpaired testing was employed.
+
+Our analysis has shown with high confidence that the there is a 
+correlation between the supplement type used and teeth growth in guinea pigs, 
+when for small doses of 0.5 and 1 milligrams, Orange Juice, clearly has
+an advantage.
