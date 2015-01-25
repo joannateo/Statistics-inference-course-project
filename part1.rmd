@@ -1,7 +1,7 @@
 ---
-title: "Coursera Statistical Inference - Simulation"
-author: "Joanna Teo"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+##title: "Coursera Statistical Inference - Simulation"
+###author: "Joanna Teo"
+###date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   pdf_document:
     toc: yes
