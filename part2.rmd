@@ -1,3 +1,8 @@
+
+##Coursera Statistical Inference - Simulation-Part 2
+####Author: "Joanna Teo"
+
+
 ## Overview
 Report analyses the ToothGrowth data as per the instructions provided 
 In Coursera Statistical Inference, Basic inferential data analysis.
