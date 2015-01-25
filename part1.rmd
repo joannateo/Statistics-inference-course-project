@@ -1,6 +1,6 @@
 
 ##Coursera Statistical Inference - Simulation-Part 1
-##Author: "Joanna Teo"
+####Author: "Joanna Teo"
 
 ```{r required.packages, echo=FALSE}
 require('knitr', quietly=TRUE)
